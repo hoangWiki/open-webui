@@ -26,9 +26,17 @@
 
 	let JWTTokenCopied = false;
 
+	let confluencePAT = '';
+	let confluencePATCopied = false;
+
+	let jiraPAT = '';
+	let jiraPATCopied = false;
+
 	let APIKey = '';
 	let APIKeyCopied = false;
 	let profileImageInputElement: HTMLInputElement;
+
+	let showTCBSCredentials = false;
 
 	const submitHandler = async () => {
 		if (name !== $user.name) {
@@ -37,12 +45,16 @@
 			}
 		}
 
-		if (webhookUrl !== $settings?.notifications?.webhook_url) {
+		if (webhookUrl !== $settings?.notifications?.webhook_url ||
+			confluencePAT !== $settings?.confluence_pat ||
+			jiraPAT !== $settings?.jira_pat) {
 			saveSettings({
 				notifications: {
 					...$settings.notifications,
 					webhook_url: webhookUrl
-				}
+				},
+				confluence_pat: confluencePAT,
+				jira_pat: jiraPAT
 			});
 		}
 
@@ -78,6 +90,8 @@
 		name = $user.name;
 		profileImageUrl = $user.profile_image_url;
 		webhookUrl = $settings?.notifications?.webhook_url ?? '';
+		confluencePAT = $settings?.confluence_pat ?? '';
+		jiraPAT = $settings?.jira_pat ?? '';
 
 		APIKey = await getAPIKey(localStorage.token).catch((error) => {
 			console.log(error);
@@ -269,9 +283,130 @@
 		<hr class="border-gray-100 dark:border-gray-850 my-4" />
 
 		<div class="flex justify-between items-center text-sm">
-			<div class="  font-medium">{$i18n.t('API keys')}</div>
+			<div class="font-medium">{$i18n.t('TCBS Personal Credentials')}</div>
 			<button
-				class=" text-xs font-medium text-gray-500"
+				class="text-xs font-medium text-gray-500"
+				type="button"
+				on:click={() => {
+					showTCBSCredentials = !showTCBSCredentials;
+				}}>{showTCBSCredentials ? $i18n.t('Hide') : $i18n.t('Show')}</button
+			>
+		</div>
+
+		{#if showTCBSCredentials}
+			<div class="flex flex-col gap-4">
+				<div class="justify-between w-full">
+					<div class="flex justify-between w-full">
+						<div class="self-center text-xs font-medium">{$i18n.t('Confluence PAT')}</div>
+					</div>
+					<div class="flex mt-2">
+						<SensitiveInput bind:value={confluencePAT} />
+						<button
+							class="ml-1.5 px-1.5 py-1 dark:hover:bg-gray-850 transition rounded-lg"
+							on:click={() => {
+								copyToClipboard(confluencePAT);
+								confluencePATCopied = true;
+								setTimeout(() => {
+									confluencePATCopied = false;
+								}, 2000);
+							}}
+						>
+							{#if confluencePATCopied}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 16 16"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V7A2.5 2.5 0 0 0 10 4.5H4.063A2 2 0 0 1 6 3h.014A2.25 2.25 0 0 1 8.25 1h1.5a2.25 2.25 0 0 1 2.236 2ZM10.5 4v-.75a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75V4h3Z"
+										clip-rule="evenodd"
+									/>
+									<path
+										fill-rule="evenodd"
+										d="M3 6a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H3Zm1.75 2.5a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5ZM4 11.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{/if}
+						</button>
+					</div>
+				</div>
+
+				<div class="justify-between w-full">
+					<div class="flex justify-between w-full">
+						<div class="self-center text-xs font-medium">{$i18n.t('Jira PAT')}</div>
+					</div>
+					<div class="flex mt-2">
+						<SensitiveInput bind:value={jiraPAT} />
+						<button
+							class="ml-1.5 px-1.5 py-1 dark:hover:bg-gray-850 transition rounded-lg"
+							on:click={() => {
+								copyToClipboard(jiraPAT);
+								jiraPATCopied = true;
+								setTimeout(() => {
+									jiraPATCopied = false;
+								}, 2000);
+							}}
+						>
+							{#if jiraPATCopied}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{:else}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 16 16"
+									fill="currentColor"
+									class="w-4 h-4"
+								>
+									<path
+										fill-rule="evenodd"
+										d="M11.986 3H12a2 2 0 0 1 2 2v6a2 2 0 0 1-1.5 1.937V7A2.5 2.5 0 0 0 10 4.5H4.063A2 2 0 0 1 6 3h.014A2.25 2.25 0 0 1 8.25 1h1.5a2.25 2.25 0 0 1 2.236 2ZM10.5 4v-.75a.75.75 0 0 0-.75-.75h-1.5a.75.75 0 0 0-.75.75V4h3Z"
+										clip-rule="evenodd"
+									/>
+									<path
+										fill-rule="evenodd"
+										d="M3 6a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H3Zm1.75 2.5a.75.75 0 0 0 0 1.5h3.5a.75.75 0 0 0 0-1.5h-3.5ZM4 11.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75Z"
+										clip-rule="evenodd"
+									/>
+								</svg>
+							{/if}
+						</button>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<hr class="border-gray-100 dark:border-gray-850 my-4" />
+
+		<div class="flex justify-between items-center text-sm">
+			<div class="font-medium">{$i18n.t('API keys')}</div>
+			<button
+				class="text-xs font-medium text-gray-500"
 				type="button"
 				on:click={() => {
 					showAPIKeys = !showAPIKeys;
@@ -334,6 +469,7 @@
 						</button>
 					</div>
 				</div>
+
 				{#if $config?.features?.enable_api_key ?? true}
 					<div class="justify-between w-full">
 						<div class="flex justify-between w-full">
